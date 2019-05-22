@@ -1,7 +1,8 @@
 # Prolog
 
-Autores:
 
-Parra,Garcia,Alejandro Carmelo ->Y16I028
-Vladimirov,Stoyanov,Petko -> Y16I019
-Revuelta,Martinez,Alvaro -> Y16I009').
+## Autores
+- [Alejandro Carmelo Parra García](https://github.com/onmax)
+- [Petko Vladimirov Stoyanov](https://github.com/ppetko98)
+- [Álvaro Revuelta](https://github.com/rv0lt)
+
