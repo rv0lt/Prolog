@@ -1,0 +1,4 @@
+ensure_loaded('/home/arevuelta/Escritorio/yo/FI/3/prolog/Prolog/Practica1/Practica1.pl')
+
+alturaTorre([pieza(s(0),s(0),s(0),a),pieza(s(0),s(0),s(0),a)],s(s(0))).
+
