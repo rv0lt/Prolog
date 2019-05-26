@@ -100,3 +100,18 @@ soy_igual(A,B):-
 	var(A);
 	var(B);
 	A == B.
+%PARTE 3
+
+listas_hojas([],[]).
+listas_hojas([H|L],[tree(H,void,void)|HOJAS]):-
+	lista_hojas(L,HOJAS).
+
+hojas_arbol([],[]).
+hojas_arbol([tree(H,void,void)|[]],tree(H,void,void)).
+hojas_arbol([tree(H1,void,void),tree(H2,void,void)|HOJAS],ARBOL):-
+	hojas_arbol(HOJAS,tree(P,R1,R2)),
+	menor(H1,H2,<,M),
+	menor(M,P,<,M2),
+	ARBOL = tree(M2,tree(M,tree(H1,void,void),tree(H2,void,void)),tree(P,R1,R2)).
+	
+	
