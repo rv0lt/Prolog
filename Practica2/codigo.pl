@@ -105,31 +105,74 @@ listas_hojas([],[]).
 listas_hojas([H|L],[tree(H,void,void)|HOJAS]):-
 	lista_hojas(L,HOJAS).
 
-%hojas_arbol([],_,[]).
-hojas_arbol([tree(H1,P11,P12),tree(H2,P21,P22)|[]],Comp,ARBOL):-
-	menor(H1,H2,Comp,M),
-	ARBOL = tree(M,tree(H1,P11,P12),tree(H2,P21,P22)).
-hojas_arbol([tree(H,I,D)|[]],_,tree(H,I,D)).
-hojas_arbol([tree(H1,P11,P12),tree(H2,P21,P22)|HOJAS],Comp,ARBOL):-
-	menor(H1,H2,Comp,M),
-	length(HOJAS,N),
-	N > 3 -> 
-	(x
-	    hojas_arbol_aux(tree(M,tree(H1,P11,P12),tree(H2,P21,P22)),Comp,ARBOL),
 
-	 );
-	 (
+hojas_arbol([tree(P,I,D)|[]],_,tree(P,I,D)).
+hojas_arbol([tree(P1,I1,D1),tree(P2,I2,D2)|HOJAS],Comp,ARBOL):-
+	menor(P1,P2,Comp,M),
+	(
+	    hojas_arbol_aux(tree(M,tree(P1,I1,D1),tree(P2,I2,D2)),HOJAS,Comp,ARBOL);
+	    ARBOL = tree(M,tree(P1,I1,D1),tree(P2,I2,D2))
+	).
 
-	     
-	 ).
-	 	
-hojas_arbol_aux(tree(P,I,D),Comp,tree(P2,I2,D2)):-
+hojas_arbol_aux(tree(P1,I1,D1),[tree(P2,I2,D2)|[]],Comp,ARBOL):-
+	menor(P1,P2,Comp,M),
+	ARBOL = tree(M,tree(P1,I1,D1),tree(P2,I2,D2)).
+hojas_arbol_aux(tree(P0,I0,D0),[tree(P1,I1,D1),tree(P2,I2,D2)|HOJAS],Comp,ARBOL):-
+	menor(P1,P2,Comp,M),
+	menor(P0,M,Comp,M0),
+	(
+	    
+	    hojas_arbol_aux(tree(M0,tree(P0,I0,D0),tree(M,tree(P1,I1,D1),tree(P2,I2,D2))),HOJAS,Comp,ARBOL);
+	    ARBOL = tree(M0,tree(P0,I0,D0),tree(M,tree(P1,I1,D1),tree(P2,I2,D2)))
+	).
+
+
+
+
+
 	
-hay_mas_hojas([_,_|[_]]).
-constuir_rama(ARBOLz,tree(P2,I2,D2),Comp):-
-	ARBOLz = tree(P,I,D),
-	menor(P,P2,Comp,M),
-	ARBOLz is tree(M,tree(P,I,D),tree(P2,I2,D2)).
+%par(X):- 0 is X mod 2.
+
+
+
+%hojas_arbol(HOJAS,Comp,ARBOL):-
+%	length(HOJAS,N),
+%	(par(N) -> hojas_arbol_aux_par(HOJAS,Comp,ARBOL) ; hojas_arbol_aux_impar(HOJAS,Comp,ARBOL)),
+%	 ARBOL = ARBOL.
+
+%hojas_arbol_aux_par([tree(P1,I1,D1)|tree(P2,I2,D2)],Comp,ARBOL):-
+%	menor(P1,P2,Comp,M),
+%	ARBOL = tree(M,tree(P,I1,D1),tree(P2,I2,D2)).
+%
+%
+%hojas_arbol_aux_par([ [] | tree(H1,I1,D1),tree(H2,I2,D2)],Comp,ARBOL):-
+%	menor(H1,H2,Comp,M),
+%	ARBOL = tree(M,tree(H1,I1,D1),tree(H2,I2,D2)).
+%hojas_arbol_aux_par([HOJAS|[tree(H1,I1,D1)|tree(H2,I2,D2)]],Comp,ARBOL):-
+%	hojas_arbol_aux_par(HOJAS,Comp,tree(P,R1,R2)),
+%	menor(H1,H2,Comp,M),
+%	menor(M,P,Comp,M2),
+%	ARBOL = tree(M2,tree(P,R1,R2),tree(M,tree(H1,I1,D1),tree(H2,I2,D2))).
+%
+%hojas_arbol_aux_impar([HOJAS],Comp,ARBOL):-
+%	
+%	hojas_arbol_aux_par(HOJAS,Comp,tree(P,R1,R2)),
+%	menor(H,P,Comp,M),
+%	ARBOL = tree(M,tree(P,R1,R2),tree(H,void,void)).
+
+
+
+
+
+
+	 	
+%hojas_arbol_aux(tree(P,I,D),Comp,tree(P2,I2,D2)):-
+	
+%hay_mas_hojas([_,_|[_]]).
+%constuir_rama(ARBOLz,tree(P2,I2,D2),Comp):-
+%	ARBOLz = tree(P,I,D),
+%	menor(P,P2,Comp,M),
+%	ARBOLz is tree(M,tree(P,I,D),tree(P2,I2,D2)).
 
 
 %hojas_arbol([tree(H1,void,void),tree(H2,void,void)|HOJAS],Comp,ARBOL):-
