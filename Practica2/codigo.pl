@@ -12,35 +12,38 @@ menor(A,B,Comp,M):-
 	arg(2,X,B),
 	(call(X) -> M=A; M=B ).
 
+
 %Caso base en el que si A o B son variables libres es true,
 %pues "Una variable libre es igual a cualquier otro termino"
 menor_o_igual(A,B):-
 	var(A);                  
 	var(B).
+
 %Usamos functor/3 para obtener el termino y la ariedad tanto de A como de B
 %Comparamos el termino de A y de B, Si el de A es menor que el de B ya se cumple
 %la condicion y por tanto es TRUE. Por el contrario si no es menor miramos si
 %son iguales, si es asi tenemos que comparar la ariedad. Si la ariedad de A es
 %menor que la ariedad de B se cumple que A es menor_o_igual de B. Si la ariedad de A
 %no es menor que el de B, comparamos si es igual. Si ambas ariedades son iguales
-%llamamos a menor_o_igual_aux/2.
+%llamamos a menor_o_igual_aux/3.
 %En el caso que:
 %A es menor que B devolvemos TRUE.
 %A es igual a B, y la ariedad de A es menor que la de B, devolvemos TRUE.
 %A es igual a B, y la ariedad de A y la de B son iguales, llamamos a menor_o_igual_aux/2.
 menor_o_igual(A,B):-
+	functor(A,NA,_),
+	functor(B,NB,_),
+	NA @< NB. %NA @< NB no hace falta evaluar el resto.
+menor_o_igual(A,B):-
 	functor(A,NA,La),
 	functor(B,NB,Lb),
+	NA == NB, %si son iguales evaluo la airedad
 	(
-	    NA @< NB; %al ser un or si NA @< NB no evalua el resto
+	    La < Lb; %al ser un or si La < Lb no evalua el resto
 	    (
-		NA == NB, %si son iguales evaluo la airedad
+		La =:= Lb, %si la ariedad es la misma llamo
 		(
-		    La < Lb; %al ser un or si La < Lb no evalua el resto
-		    (
-			La =:= Lb, %si la ariedad es la misma llamo 
-			menor_o_igual_aux(A,B) %a menor_o_igual_aux/2.
-		    )
+		    menor_o_igual_aux(A,B,1) %a menor_o_igual_aux/2.
 		)
 	    )
 	).
@@ -50,68 +53,100 @@ menor_o_igual(A,B):-
 %la condicion(segun lo especificado en el enunciado). si son iguales compruebo el siguiente termino,
 %En cualquier otro caso es false
 
-%CASO BASE en el que la ariedad de A es 0,por lo que ambos terminos son iguales.
-%Esto es asi pues a este predicado solo se le llama cuando el termino de A y B son iguales y con la
-%misma ariedad, por lo que si la ariedad es 0 son identicos.
-menor_o_igual_aux(A,_):-
-	functor(A,_,XA),
-	XA == 0.
-
-%En el caso de que la ariedad no sea 0, se obtiene el primer termino de A y de B, que son los que se
-%han de comparar. Llamamos a menor_o_igual para compararlos, devuelve true cuando A es menor o igual a B
-%y entonces si A distinto de B, significa que A es menor que B por lo que es true.
-menor_o_igual_aux(A,B):-
-	arg(1,A,ElemA),
-	arg(1,B,ElemB),
-	menor_o_igual(ElemA,ElemB),
-	\+soy_igual(ElemA,ElemB).
-
-%Caso en el que el termino 1 de A y de B son identicos, creamos nuevos predicados de ariedad 1 menor que
-%el de A y de B, son los mismos terminos salvo el primero(que ya sabemos que es identico).
-%Tras esto llamamos a menor_o_igual_aux/2 con los nuevos predicados.
-%Ejem. A=p(a,b,c) B=p(a,b,d), comparamos el primer termino, 'a' es igual a 'a'. Genero nuevos predicados,
-%NuevaA=p(b,c), NuevaB=p(b,d) y hacemos la recursividad.
-menor_o_igual_aux(A,B):-
-	arg(1,A,ElemA),                   %Obtenemos el primer termino de A
-	arg(1,B,ElemB),	                  %Obtenemos el primer termino de B
-	soy_igual(ElemA,ElemB),           %Comparamos si son iguales los terminos.
-	functor(A,MA,XA),                 %Obtenemos el termino y la ariedad de A
-	functor(B,MB,XB),                 %Obtenemos el termino y la ariedad de B
-	Xnuevo is XA-1,                   %Nueva ariedad para los nuevos terminos
-	functor(NuevaA,MA,Xnuevo),        %Creamos NuevaA con el termino de A y la nueva ariedad
-	functor(NuevaB,MB,Xnuevo),        %Creamos NuevaA con el termino de A y la nueva ariedad
-	reducir_predicado(A,NuevaA,1,XA), %Llamada a reducir_predicado con A, NuevaA, un cont, y un Tamanno
-	reducir_predicado(B,NuevaB,1,XB),!, %Llamada a reducir_predicado con B, NuevaB, un cont, y un Tamanno
-	menor_o_igual_aux(NuevaA,NuevaB). %Llamada recursiva con los nuevos predicados.
+%Si la ariedad de A es 0 significa que ya hemos evaluado todos los terminos y son iguales por tanto A es igual a B y TRUE
+menor_o_igual_aux(A,_,N):-
+	functor(A,_,La),
+	N1 is N-1,
+	La =:= N1.
+%Sacamos el termino N de A y de B, si nos iguales hago recursividad avanzando N para comparar el siguiente termmino.
+menor_o_igual_aux(A,B,N):-
+	arg(N,A,ElemA),
+	arg(N,B,ElemB),
+	soy_igual(ElemA,ElemB),!,
+	N1 is N+1,
+	menor_o_igual_aux(A,B,N1).
+%En este caso sabemos que el termino N de A y B no es igual, por lo que si es menor devolvemos true yno hace falta comparar mas.
+menor_o_igual_aux(A,B,N):-
+	arg(N,A,ElemA),
+	arg(N,B,ElemB),
+	menor_o_igual(ElemA,ElemB).
 
 
-%Predicado auxiliar que reduce en 1 la ariedad de P1 eliminando el primer termino.
-%Ejem. P1=p(1,2,3,4) -> P2=p(2,3,4).
-reducir_predicado(P1,P2,Cont,Tam):-
-	Cont =\= Tam,
-	Cont2 is Cont+1,
-	arg(Cont2,P1,M),
-	arg(Cont,P2,M),
-	reducir_predicado(P1,P2,Cont2,Tam);
-	true.
-		
-	
+
+%Predicado auxiliar que se usa para evaluar si dos terminos son iguales
+%Dos terminos son iguales si alguno de ellos es variable libre.
+%Dos terminos son iguales los nombres de ambos, tienen la misma ariedad y sus argumentos son identicos.
 soy_igual(A,B):-
 	var(A);
-	var(B);
-	A == B.
+	var(B).
+%Miramos que los nombres y la ariedad de A y B sean iguales, si es asi llamo a soy/igual_aux/3 que avalua cada argumento.
+soy_igual(A,B):-
+	functor(A,NA,La),
+	functor(B,NB,Lb),
+	NA == NB,
+	La =:= Lb,
+	soy_igual_aux(A,B,1).
+%caso base en el que ya se han comparado todos los argumentos, por lo tanto son iguales
+soy_igual_aux(A,_,N):-
+	functor(A,_,La),
+	N1 is N-1,
+	La =:= N1.
+%Sacamos el argumento N de A y B y miramos si son iguales llamando a soy_igual/2
+%si son iguales avanzamos N y hacemos recursividad
+soy_igual_aux(A,B,N):-
+	arg(N,A,ElemA),
+	arg(N,B,ElemB),
+	soy_igual(ElemA,ElemB),
+	N1 is N+1,
+	soy_igual_aux(A,B,N1).
 %PARTE 3
 
 listas_hojas([],[]).
 listas_hojas([H|L],[tree(H,void,void)|HOJAS]):-
 	lista_hojas(L,HOJAS).
 
-hojas_arbol([],[]).
-hojas_arbol([tree(H,void,void)|[]],tree(H,void,void)).
-hojas_arbol([tree(H1,void,void),tree(H2,void,void)|HOJAS],ARBOL):-
-	hojas_arbol(HOJAS,tree(P,R1,R2)),
-	menor(H1,H2,<,M),
-	menor(M,P,<,M2),
-	ARBOL = tree(M2,tree(M,tree(H1,void,void),tree(H2,void,void)),tree(P,R1,R2)).
+%hojas_arbol([],_,[]).
+hojas_arbol([tree(H1,P11,P12),tree(H2,P21,P22)|[]],Comp,ARBOL):-
+	menor(H1,H2,Comp,M),
+	ARBOL = tree(M,tree(H1,P11,P12),tree(H2,P21,P22)).
+hojas_arbol([tree(H,I,D)|[]],_,tree(H,I,D)).
+hojas_arbol([tree(H1,P11,P12),tree(H2,P21,P22)|HOJAS],Comp,ARBOL):-
+	menor(H1,H2,Comp,M),
+	length(HOJAS,N),
+	N > 3 -> 
+	(x
+	    hojas_arbol_aux(tree(M,tree(H1,P11,P12),tree(H2,P21,P22)),Comp,ARBOL),
+
+	 );
+	 (
+
+	     
+	 ).
+	 	
+hojas_arbol_aux(tree(P,I,D),Comp,tree(P2,I2,D2)):-
 	
+hay_mas_hojas([_,_|[_]]).
+constuir_rama(ARBOLz,tree(P2,I2,D2),Comp):-
+	ARBOLz = tree(P,I,D),
+	menor(P,P2,Comp,M),
+	ARBOLz is tree(M,tree(P,I,D),tree(P2,I2,D2)).
+
+
+%hojas_arbol([tree(H1,void,void),tree(H2,void,void)|HOJAS],Comp,ARBOL):-
+%	(
+%	   % hojas_arbol(HOJAS,Comp,tree(P,R1,R2)),
+%	    menor(H1,H2,Comp,M),
+%	    %menor(M,P,Comp,M2),
+%	    constuir_rama(H1,H2,M,ARBOL_AUX),
+%	    
+%	    hojas_arbol(HOJAS,Comp,tree(P,R1,R2)), 
+%	    menor(M,P,Comp,M2),
+%	    
+%	    ARBOL = tree(M2,ARBOL_AUX,tree(P,R1,R2))
+%	);
+%	(
+%	    hojas_arbol(HOJAS,[]),
+%	    menor(H1,H2,Comp,M),
+%	    ARBOL=tree(M,tree(H1,void,void),tree(H2,void,void))
+%	).
 	
