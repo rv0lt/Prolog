@@ -99,97 +99,85 @@ soy_igual_aux(A,B,N):-
 	soy_igual(ElemA,ElemB),
 	N1 is N+1,
 	soy_igual_aux(A,B,N1).
-%PARTE 3
-
-listas_hojas([],[]).
-listas_hojas([H|L],[tree(H,void,void)|HOJAS]):-
-	lista_hojas(L,HOJAS).
 
 
-hojas_arbol([tree(P,I,D)|[]],_,tree(P,I,D)).
-hojas_arbol([tree(P1,I1,D1),tree(P2,I2,D2)|HOJAS],Comp,ARBOL):-
-	menor(P1,P2,Comp,M),
-	(
-	    hojas_arbol_aux(tree(M,tree(P1,I1,D1),tree(P2,I2,D2)),HOJAS,Comp,ARBOL);
-	    ARBOL = tree(M,tree(P1,I1,D1),tree(P2,I2,D2))
+%Si esta vacio la lisa de hojas no hay arbol.
+hojas_arbol([],_,_).
+%Si solo hay una hoja, esa es el arbol
+hojas_arbol([X],_,X).
+%Si hay mas hojas se llama a hojas_arbol_aux/4 para que genere el arbol
+hojas_arbol(Lista,Comp,Arbol):-
+	hojas_arbol_aux(Lista,[],Comp,Arbol).
+
+%El primer termino es una list con las hojas que quedan por fusionarse, una vez se fususionan se pasan a la segunda lista, cuando la primera lista esta vacia se pasan todos los elementos de la segunda a la primera y se vacia la segunda. Si queda 1 elemento en la primera lista este se pone al final de la segunda y despues se pasa la segunda lista a la primera y se vacia la segunda.
+%El proceso se repite hasta que solo quede un elemento en la primera, que significa que ya esta el arbol creado
+
+
+%Si solo queda 1 hoja se devuelve esa como el arbol
+hojas_arbol_aux([X],[],_,X).
+%Si la primera lista esta vacia se vuelca el contenido de la segunda en la primera y se vacia la segunda. Y se vuelve a llamar a hojas_arbol_aux/4
+hojas_arbol_aux([],Lista,Comp,Arbol):-
+	hojas_arbol_aux(Lista,[],Comp,Arbol).
+%Si solo queda 1 elemento en la primera lista se añade al final de la segunda. Posteriormente la segunda lista se vuelca en la primera y se vacia la segunda. Y se vuelve a llamar a hojas_arbol_aux/4
+hojas_arbol_aux([X],Lista,Comp,Arbol):-
+	insertar(Lista,X,Lista1),
+	hojas_arbol_aux(Lista1,[],Comp,Arbol).
+%si hay mas elementos se sacan los dos priemos y se construye un arbol con ellos. Despues se añaden al final de la  segunda lista. Se vuelve a llamr a hojas_arbol_aux/4, pero en la primera lista ya no estan los dos primeros elementos.
+hojas_arbol_aux([tree(E_A,H1_A,H2_A),tree(E_B,H1_B,H2_B)|Hojas],Lista,Comp,Arbol):-
+	menor(E_A,E_B,Comp,M),
+	insertar(Lista,tree(M,tree(E_A,H1_A,H2_A),tree(E_B,H1_B,H2_B)),Lista1),
+	hojas_arbol_aux(Hojas,Lista1,Comp,Arbol).
+	
+
+%nserta un Item al final de una lista y lo devuelve en SOlucion.
+insertar(Lista,Item,Solucion):-
+	length(Lista,X),
+	X =:= 0,
+	Solucion = [Item].
+insertar([E|Lista],Item,[E|Solucion]):-
+	insertar(Lista,Item,Solucion).
+
+
+
+ordenacion(Arbol,Comp,Orden):-
+	ordenacion_aux(Arbol,Comp,[],Aux),
+	Orden = Aux.
+ordenacion_aux(tree(E,I,D),Comp,Orden,Aux):-
+	insertar(Orden,E,Nueva_Lista),
+	reflotar(tree(E,I,D),Comp,X) ->
+	ordenacion_aux(X,Comp,Nueva_Lista,Aux);
+	Aux = Nueva_Lista.
+
+
+%ordenacion_aux(tree(E,tree(E1,void,void),tree(E2,void,void))),_,Orden,Aux):-
+%	insertar(Orden,E,Aux),
+
+%ordenacion_aux(tree(E,I,D),_,Orden,Aux):-
+%	insertar(Orden,E,Aux).
+
+		    
+%ordenacion(tree(E_padre(tree(E_padre,void,void),tree(E_2,void,void))),Comp,Orden):-
+	
+	
+%ordenacion(tree(E_padre,(tree(E_padre,I1,D1),tree(_,_,_))),_,_):-
+%	ordenacion(tree(E_padre,I1,D1)).
+
+reflotar(tree(E,void,void),_,X):-
+	X=void.
+reflotar(tree(E,tree(E1,void,void),tree(E2,void,void)),_,X):-
+	E == E1 -> X=tree(E2,void,void); X=tree(E1,void,void).
+
+reflotar(tree(E,tree(E1,I1,D1),tree(E2,I2,D2)),Comp,X):-
+	(E == E1 ->
+	 (reflotar(tree(E1,I1,D1),Comp,tree(X1Elem,XI1,XD1)),
+	  menor(E2,X1Elem,Comp,M),
+	  X=tree(M,tree(X1Elem,XI1,XD1),tree(E2,I2,D2))
+	  );
+	    (reflotar(tree(E2,I2,D2),Comp,tree(X2Elem,XI2,XD2)),
+	     menor(E1,X2Elem,Comp,M),
+	     X=tree(M,tree(E2,I2,D2),tree(X2Elem,XI2,XD2)) 
+	  )
 	).
-
-hojas_arbol_aux(tree(P1,I1,D1),[tree(P2,I2,D2)|[]],Comp,ARBOL):-
-	menor(P1,P2,Comp,M),
-	ARBOL = tree(M,tree(P1,I1,D1),tree(P2,I2,D2)).
-hojas_arbol_aux(tree(P0,I0,D0),[tree(P1,I1,D1),tree(P2,I2,D2)|HOJAS],Comp,ARBOL):-
-	menor(P1,P2,Comp,M),
-	menor(P0,M,Comp,M0),
-	(
-	    
-	    hojas_arbol_aux(tree(M0,tree(P0,I0,D0),tree(M,tree(P1,I1,D1),tree(P2,I2,D2))),HOJAS,Comp,ARBOL);
-	    ARBOL = tree(M0,tree(P0,I0,D0),tree(M,tree(P1,I1,D1),tree(P2,I2,D2)))
-	).
+	%X=X1.
 
 
-
-
-
-	
-%par(X):- 0 is X mod 2.
-
-
-
-%hojas_arbol(HOJAS,Comp,ARBOL):-
-%	length(HOJAS,N),
-%	(par(N) -> hojas_arbol_aux_par(HOJAS,Comp,ARBOL) ; hojas_arbol_aux_impar(HOJAS,Comp,ARBOL)),
-%	 ARBOL = ARBOL.
-
-%hojas_arbol_aux_par([tree(P1,I1,D1)|tree(P2,I2,D2)],Comp,ARBOL):-
-%	menor(P1,P2,Comp,M),
-%	ARBOL = tree(M,tree(P,I1,D1),tree(P2,I2,D2)).
-%
-%
-%hojas_arbol_aux_par([ [] | tree(H1,I1,D1),tree(H2,I2,D2)],Comp,ARBOL):-
-%	menor(H1,H2,Comp,M),
-%	ARBOL = tree(M,tree(H1,I1,D1),tree(H2,I2,D2)).
-%hojas_arbol_aux_par([HOJAS|[tree(H1,I1,D1)|tree(H2,I2,D2)]],Comp,ARBOL):-
-%	hojas_arbol_aux_par(HOJAS,Comp,tree(P,R1,R2)),
-%	menor(H1,H2,Comp,M),
-%	menor(M,P,Comp,M2),
-%	ARBOL = tree(M2,tree(P,R1,R2),tree(M,tree(H1,I1,D1),tree(H2,I2,D2))).
-%
-%hojas_arbol_aux_impar([HOJAS],Comp,ARBOL):-
-%	
-%	hojas_arbol_aux_par(HOJAS,Comp,tree(P,R1,R2)),
-%	menor(H,P,Comp,M),
-%	ARBOL = tree(M,tree(P,R1,R2),tree(H,void,void)).
-
-
-
-
-
-
-	 	
-%hojas_arbol_aux(tree(P,I,D),Comp,tree(P2,I2,D2)):-
-	
-%hay_mas_hojas([_,_|[_]]).
-%constuir_rama(ARBOLz,tree(P2,I2,D2),Comp):-
-%	ARBOLz = tree(P,I,D),
-%	menor(P,P2,Comp,M),
-%	ARBOLz is tree(M,tree(P,I,D),tree(P2,I2,D2)).
-
-
-%hojas_arbol([tree(H1,void,void),tree(H2,void,void)|HOJAS],Comp,ARBOL):-
-%	(
-%	   % hojas_arbol(HOJAS,Comp,tree(P,R1,R2)),
-%	    menor(H1,H2,Comp,M),
-%	    %menor(M,P,Comp,M2),
-%	    constuir_rama(H1,H2,M,ARBOL_AUX),
-%	    
-%	    hojas_arbol(HOJAS,Comp,tree(P,R1,R2)), 
-%	    menor(M,P,Comp,M2),
-%	    
-%	    ARBOL = tree(M2,ARBOL_AUX,tree(P,R1,R2))
-%	);
-%	(
-%	    hojas_arbol(HOJAS,[]),
-%	    menor(H1,H2,Comp,M),
-%	    ARBOL=tree(M,tree(H1,void,void),tree(H2,void,void))
-%	).
-	
