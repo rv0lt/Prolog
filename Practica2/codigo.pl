@@ -101,6 +101,14 @@ soy_igual_aux(A,B,N):-
 	soy_igual_aux(A,B,N1).
 
 
+
+
+
+lista_hojas([],[]).
+lista_hojas([H|L],[tree(H,void,void)|HOJAS]):-
+  lista_hojas(L,HOJAS).
+
+
 %Si esta vacio la lisa de hojas no hay arbol.
 hojas_arbol([],_,_).
 %Si solo hay una hoja, esa es el arbol
@@ -162,10 +170,14 @@ ordenacion_aux(tree(E,I,D),Comp,Orden,Aux):-
 %ordenacion(tree(E_padre,(tree(E_padre,I1,D1),tree(_,_,_))),_,_):-
 %	ordenacion(tree(E_padre,I1,D1)).
 
-reflotar(tree(E,void,void),_,X):-
+reflotar(tree(_,void,void),_,X):-
 	X=void.
-reflotar(tree(E,tree(E1,void,void),tree(E2,void,void)),_,X):-
-	E == E1 -> X=tree(E2,void,void); X=tree(E1,void,void).
+reflotar(tree(E,tree(E,void,void),tree(E2,I2,D2)),_,X):-
+	X = tree(E2,I2,D2).
+reflotar(tree(E,tree(E1,I1,D1),tree(E,void,void)),_,X):-
+	X = tree(E1,I1,D1).
+%reflotar(tree(E,tree(E1,void,void),tree(E2,void,void)),_,X):-
+%	E == E1 -> X=tree(E2,void,void); X=tree(E1,void,void).
 
 reflotar(tree(E,tree(E1,I1,D1),tree(E2,I2,D2)),Comp,X):-
 	(E == E1 ->
@@ -179,5 +191,10 @@ reflotar(tree(E,tree(E1,I1,D1),tree(E2,I2,D2)),Comp,X):-
 	  )
 	).
 	%X=X1.
+
+
+
+
+
 
 
