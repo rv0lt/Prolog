@@ -146,29 +146,12 @@ insertar([E|Lista],Item,[E|Solucion]):-
 	insertar(Lista,Item,Solucion).
 
 
-
-ordenacion(Arbol,Comp,Orden):-
-	ordenacion_aux(Arbol,Comp,[],Aux),
-	Orden = Aux.
-ordenacion_aux(tree(E,I,D),Comp,Orden,Aux):-
-	insertar(Orden,E,Nueva_Lista),
-	reflotar(tree(E,I,D),Comp,X) ->
-	ordenacion_aux(X,Comp,Nueva_Lista,Aux);
-	Aux = Nueva_Lista.
+ordenacion(void,_,[]).
+ordenacion(tree(N,I,D), Comp, [N|Orden]):-
+	reflotar(tree(N,I,D),Comp,ArbolReflotado),
+	ordenacion(ArbolReflotado, Comp, Orden).
 
 
-%ordenacion_aux(tree(E,tree(E1,void,void),tree(E2,void,void))),_,Orden,Aux):-
-%	insertar(Orden,E,Aux),
-
-%ordenacion_aux(tree(E,I,D),_,Orden,Aux):-
-%	insertar(Orden,E,Aux).
-
-		    
-%ordenacion(tree(E_padre(tree(E_padre,void,void),tree(E_2,void,void))),Comp,Orden):-
-	
-	
-%ordenacion(tree(E_padre,(tree(E_padre,I1,D1),tree(_,_,_))),_,_):-
-%	ordenacion(tree(E_padre,I1,D1)).
 
 reflotar(tree(_,void,void),_,X):-
 	X=void.
@@ -176,8 +159,6 @@ reflotar(tree(E,tree(E,void,void),tree(E2,I2,D2)),_,X):-
 	X = tree(E2,I2,D2).
 reflotar(tree(E,tree(E1,I1,D1),tree(E,void,void)),_,X):-
 	X = tree(E1,I1,D1).
-%reflotar(tree(E,tree(E1,void,void),tree(E2,void,void)),_,X):-
-%	E == E1 -> X=tree(E2,void,void); X=tree(E1,void,void).
 
 reflotar(tree(E,tree(E1,I1,D1),tree(E2,I2,D2)),Comp,X):-
 	(E == E1 ->
@@ -187,12 +168,14 @@ reflotar(tree(E,tree(E1,I1,D1),tree(E2,I2,D2)),Comp,X):-
 	  );
 	    (reflotar(tree(E2,I2,D2),Comp,tree(X2Elem,XI2,XD2)),
 	     menor(E1,X2Elem,Comp,M),
-	     X=tree(M,tree(E2,I2,D2),tree(X2Elem,XI2,XD2)) 
+	     X=tree(M,tree(E1,I1,D1),tree(X2Elem,XI2,XD2)) 
 	  )
 	).
-	%X=X1.
 
-
+ordenar(Lista,Comp,Orden):-
+	lista_hojas(Lista,Hojas),
+	hojas_arbol(Hojas,Comp,Arbol),
+	ordenacion(Arbol,Comp,Orden).
 
 
 
