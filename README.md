@@ -1,5 +1,5 @@
 # Prolog
-Trabajos en lenguaje Prolog de la Universidad Politecnica de Madrid para la asignatura Programación Lógica
+Trabajos de la Universidad Politecnica de Madrid en lenguaje Prolog para la asignatura Programación Lógica
 
 ## Autores
 - [Alejandro Carmelo Parra García](https://github.com/athanatos96)
